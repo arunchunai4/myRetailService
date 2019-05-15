@@ -28,7 +28,7 @@ public class MyRetailServiceImpl implements MyRetailService {
 	private ProductTitleExternal prodTitleExt;
 
 	@Override
-	public void createPrice(Price price) throws MyRetailException {
+	public boolean createPrice(Price price) throws MyRetailException {
 
 		Product prod = new Product();
 		prod.setId(price.getId());
@@ -45,6 +45,7 @@ public class MyRetailServiceImpl implements MyRetailService {
 			LOGGER.error(e.getMessage() + " :: " + price.toString(), e);
 			throw new MyRetailException(e.getMessage() + " :: " + price.toString(), e);
 		}
+		return true;
 	}
 
 	@Override

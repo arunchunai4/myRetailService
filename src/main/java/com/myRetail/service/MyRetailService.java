@@ -21,7 +21,7 @@ public interface MyRetailService {
 	 * @return
 	 * @throws MyRetailException
 	 */
-	public void createPrice(Price price) throws MyRetailException;
+	public boolean createPrice(Price price) throws MyRetailException;
 
 	/**
 	 * Retrieve price for given product

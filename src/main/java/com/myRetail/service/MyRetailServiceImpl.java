@@ -7,10 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.myRetail.bean.Price;
-import com.myRetail.bean.PriceBean;
+import com.myRetail.bean.PriceValue;
 import com.myRetail.exception.MyRetailException;
+import com.myRetail.external.ProductTitleExternal;
 import com.myRetail.model.Product;
 import com.myRetail.repository.ProductRepository;
 
@@ -22,13 +24,16 @@ public class MyRetailServiceImpl implements MyRetailService {
 	@Autowired
 	private ProductRepository productRepo;
 
+	@Autowired
+	private ProductTitleExternal prodTitleExt;
+
 	@Override
 	public void createPrice(Price price) throws MyRetailException {
 
 		Product prod = new Product();
 		prod.setId(price.getId());
-		prod.setPrice(price.getPriceBean().getPrice());
-		prod.setCurrency_code(price.getPriceBean().getCurrencyCode());
+		prod.setPrice(price.getPriceValue().getPrice());
+		prod.setCurrency_code(price.getPriceValue().getCurrencyCode());
 		prod.setLast_change_user(price.getLastChangeUser());
 		prod.setLast_update_ts(LocalDateTime.now());
 
@@ -46,27 +51,45 @@ public class MyRetailServiceImpl implements MyRetailService {
 	public Optional<Price> retrievePrice(Integer productId) throws MyRetailException {
 
 		Price price = new Price();
-		PriceBean priceBean = new PriceBean();
+		PriceValue priceValue = new PriceValue();
 		Optional<Price> responsePrice;
 		Optional<Product> responseProduct;
+		String title = null;
 
 		try {
+
 			responseProduct = productRepo.findById(productId);
 
-			responseProduct.ifPresentOrElse(p -> {
-				price.setId(p.getId());
-				priceBean.setPrice(p.getPrice());
-				priceBean.setCurrencyCode(p.getCurrency_code());
-				price.setPriceBean(priceBean);
-				price.setLastChangeUser(p.getLast_change_user());
-			}, () -> LOGGER.info("Product not found"));
-			responsePrice = Optional.of(price);
+			if (responseProduct.isPresent()) {
+				price.setId(responseProduct.get().getId());
+				priceValue.setPrice(responseProduct.get().getPrice());
+				priceValue.setCurrencyCode(responseProduct.get().getCurrency_code());
+				price.setPriceValue(priceValue);
+				price.setLastChangeUser(responseProduct.get().getLast_change_user());
 
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage() + " :: " + productId, e);
-			throw new MyRetailException(e.getMessage() + " :: " + productId, e);
+				title = prodTitleExt.getTitle(price.getId());
+
+				if (null != title && !title.isEmpty()) {
+					price.setName(title);
+				} else {
+					LOGGER.info("Title is null for the product :: " + productId);
+					throw new MyRetailException("Title is null for the product :: " + productId);
+				}
+				responsePrice = Optional.of(price);
+				return responsePrice;
+			} else {
+				return Optional.empty();
+			}
+
 		}
-		return responsePrice;
+
+		catch (HttpClientErrorException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			LOGGER.debug(e.getMessage() + " :: " + productId, e);
+			throw new MyRetailException(e.getMessage() + " :: procuctId" + productId, e);
+		}
 	}
 
 }

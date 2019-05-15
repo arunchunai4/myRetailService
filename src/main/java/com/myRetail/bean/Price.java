@@ -26,7 +26,7 @@ public class Price {
 	private int id;
 
 	@NotNull
-	private PriceBean priceBean;
+	private PriceValue priceValue;
 
 	@Size(min = 1, max = 10, message = "last change user id should have characters of size between 1 and 10")
 	@NotEmpty
@@ -35,8 +35,12 @@ public class Price {
 
 	private String name;
 
-	public Price(@NotNull int id, @Size(max = 10) @NotEmpty @NotNull String lastChangeUser, String name) {
+	public Price(@NotNull @Min(1) @Max(999999999) int id, @NotNull PriceValue priceValue,
+			@Size(min = 1, max = 10, message = "last change user id should have characters of size between 1 and 10") @NotEmpty @NotNull String lastChangeUser,
+			String name) {
+		super();
 		this.id = id;
+		this.priceValue = priceValue;
 		this.lastChangeUser = lastChangeUser;
 		this.name = name;
 	}
@@ -69,17 +73,17 @@ public class Price {
 		this.name = name;
 	}
 
-	public PriceBean getPriceBean() {
-		return priceBean;
+	public PriceValue getPriceValue() {
+		return priceValue;
 	}
 
-	public void setPriceBean(PriceBean priceBean) {
-		this.priceBean = priceBean;
+	public void setPriceValue(PriceValue priceValue) {
+		this.priceValue = priceValue;
 	}
 
 	@Override
 	public String toString() {
-		return "[id=" + id + ", " + priceBean.toString() + ", lastChangeUser=" + lastChangeUser + "]";
+		return "[id=" + id + ", " + priceValue.toString() + ", lastChangeUser=" + lastChangeUser + "]";
 	}
 
 }

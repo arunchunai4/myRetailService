@@ -5,7 +5,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public class PriceBean {
+public class PriceValue {
 
 	@NotNull
 	@DecimalMin("0")
@@ -16,11 +16,11 @@ public class PriceBean {
 	@NotEmpty
 	private String currencyCode;
 
-	public PriceBean() {
+	public PriceValue() {
 		
 	}
 	
-	public PriceBean(@NotNull @DecimalMin("0") Double price,
+	public PriceValue(@NotNull @DecimalMin("0") Double price,
 			@Size(min = 3, max = 3, message = "currency code should have 3 characters") @NotNull @NotEmpty String currencyCode) {
 		this.price = price;
 		this.currencyCode = currencyCode;
